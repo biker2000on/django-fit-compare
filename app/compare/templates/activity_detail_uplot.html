@@ -148,34 +148,27 @@
 
     // wait.textContent = "Done!";
     console.timeEnd("chart");
+    return uplot
   }
 
   function getSelectedOptions(sel, fn) {
     var opts = [],
       opt;
-
-    // loop through options in select list
     for (var i = 0, len = sel.options.length; i < len; i++) {
       opt = sel.options[i];
-
-      // check if selected
       if (opt.selected) {
-        // add to array of option elements to return from this function
         opts.push(opt.value);
-
-        // invoke optional callback function if provided
         if (fn) {
           fn(opt);
         }
       }
     }
-
-    // return array containing references to selected option elements
     return opts;
   }
 
   // let wait = document.getElementById("wait");
   const actId = document.location.pathname.split('/').pop()
+  let plots = {}
   const select = document.getElementById('plots-select')
   fetch(`/activity/${actId}/data`).then(r => r.json()).then(packed => {
     // wait.textContent = "Rendering...";
@@ -185,18 +178,24 @@
     setTimeout(() => {
       Object.keys(packed[0])
         .slice(5)
-        .map((c, i) => makeChart(Array(data[0], data[i + 1]), c))
+        .map((c, i) => {
+          plots[c] = makeChart(Array(data[0], data[i + 1]), c)
+        })
     }, 0);
+    
     Object.keys(packed[0]).slice(5).map(c => {
-      select.add(new Option(c, c))
+      select.add(new Option(c, c, true, true))
     })
 
     setTimeout(() => console.timeEnd('ready'), 0)
-    // setTimeout(() => console.log(packed), 0)
-    // setTimeout(() => console.log(data), 0)
   });
+
   select.onchange = function (e) {
-    console.log(getSelectedOptions(select))
+    let selected = getSelectedOptions(select)
+    // console.log(selected)
+    for (key of Object.keys(plots)) {
+      plots[key].root.hidden = selected.includes(key) ? false : true
+    }
   }
 </script>
 
