@@ -56,7 +56,7 @@ class IndexView(generic.ListView):
     #     return .objects.filter(user=self.request.user) 
 
 class ActivityDetailView(generic.DetailView):
-    template_name = 'activity_detail.html'
+    template_name = 'activity_detail_uplot.html'
     model = Activity
     # def get_context_data(self, **kwargs):
     #     # Call the base implementation first to get a context
