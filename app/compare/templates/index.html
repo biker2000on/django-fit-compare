@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if activity_list %}
+<table class="table is-bordered is-hoverable has-text-centered">
+    <thead>
+        <tr>
+            <th>Activity</th>
+            <th>Start Time</th>
+            <th>Distance</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for act in activity_list %}
+        <tr>
+            <td><a href="{% url 'compare:activity-detail' act.id %}">{{ act.fitfile.file.name }}</a></td>
+            <td>{{ act.start_time }}</td>
+            <td>{{ act.total_distance }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endif %}
+
+{% endblock content %}

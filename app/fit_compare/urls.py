@@ -18,11 +18,8 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 
-from compare.views import image_upload
-
 urlpatterns = [
-    path('', include('compare.urls'))
-    path("upload", image_upload, name="upload"),
+    path('', include('compare.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
 ]

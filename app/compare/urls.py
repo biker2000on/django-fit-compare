@@ -4,6 +4,13 @@ from . import views
 
 app_name = 'compare'
 urlpatterns = [
+    path("", views.IndexView.as_view(), name='index'),
+    path('activity/<int:pk>', views.ActivityDetailView.as_view(), name='activity-detail'),
+    path('activity/<int:pk>/uplot', views.ActivityDetailUplotView.as_view(), name='activity-detail-uplot'),
+    path('activity/<int:pk>/data', views.json_ride, name='activity-data'),
+    # path("upload", views.image_upload, name="i"),
+    path("uploadfile", views.upload_file, name="upload"),
+    path('accounts/signup', views.signup, name='signup'),
     # path('', views.IndexView.as_view(), name='index'),
     # path('items', views.getItems, name='items'),
     # path('item/<int:pk>', views.ItemDetailView.as_view(), name='item_detail'),
