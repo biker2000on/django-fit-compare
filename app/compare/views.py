@@ -39,7 +39,7 @@ def signup(request):
             raw_password = form.cleaned_data.get('password1')
             user = authenticate(username=username, password=raw_password)
             login(request, user)
-            return redirect('ltltlt:index')
+            return redirect('compare:index')
     else:
         form = UserCreationForm()
     return render(request, 'registration/signup.html', {'form': form})
@@ -48,24 +48,25 @@ def json_ride(request, pk):
     records = Activity.objects.get(id=pk).record_set.all().values()
     return JsonResponse(list(records), safe=False)
 
+def json_rides(request):
+    activities = request.GET.get('activities', None)
+    acts = []
+    if activities:
+        for act in activities.split(','):
+            acts.append(list(Activity.objects.get(id=act).record_set.all().values()))
+    return JsonResponse(acts, safe=False)
+
 class IndexView(generic.ListView):
     template_name = 'index.html'
     model = Activity
-    # def get_queryset(self):
-    #     """Return the last five published questions."""
-    #     return .objects.filter(user=self.request.user) 
 
 class ActivityDetailView(generic.DetailView):
     template_name = 'activity_detail_uplot.html'
     model = Activity
-    # def get_context_data(self, **kwargs):
-    #     # Call the base implementation first to get a context
-    #     context = super().get_context_data(**kwargs)
-    #     # Add in a QuerySet of all the books
-    #     prices = Item.objects.get(id=self.kwargs['pk']).price_set.all().values()
-    #     context['prices'] = list(prices)
-    #     return context
 
-class ActivityDetailUplotView(generic.DetailView):
-    template_name = 'activity_detail_uplot.html'
-    model = Activity
+def compareView(request):
+    activities = request.GET.get('activities', None)
+    if activities:
+        activities = activities.split(',')
+
+    return render(request, 'compare.html', {"activities": activities})

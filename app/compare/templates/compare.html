@@ -9,9 +9,18 @@
 
 {% block content %}
 
-<div class="select is-multiple is-loading">
-  <select name="plots[]" id="plots-select" multiple>
+{% if activities %}
+<ul>
+  {% for activity in activities %}
+  <li>{{ activity }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="is-size-3">No activities queried</p>
+{% endif %}
 
+<div class="select is-multiple is-loading">
+  <select id="plots-select" multiple>
   </select>
 </div>
 <div id="chart"></div>
@@ -25,17 +34,27 @@
 <script>
   function prepData(packed) {
     console.time("prep");
-    let keys = Object.keys(packed[0]).slice(5)
-
+    const keys = Object.keys(packed[0][0]).slice(5)
+    const keyLen = keys.length
     let data = []
-    for (let i = 0; i <= keys.length; i++) {
-      data.push(Array(packed.length))
+    const lengths = packed.map(c => c ? c.length : null)
+    const maxLen = packed.reduce((a, c, i) => c.length > a[0] ? [c.length, i] : a, [0, 0])
+    for (let i = 0; i <= keys.length * packed.length; i++) {
+      data.push(Array(maxLen[0]))
     }
-    for (let i = 0; i < packed.length; i++) {
-      data[0][i] = new Date(packed[i].timestamp).getTime() / 1000
-      Object.values(packed[i]).slice(5).map((c, j) => {
-        data[j + 1][i] = c
-      })
+    for (let i = 0; i < maxLen[0]; i++) {
+      data[0][i] = new Date(packed[maxLen[1]][i].timestamp).getTime() / 1000
+      for (let k = 0; k < packed.length; k++) {
+        if (packed[k] && lengths[k] > i) {
+          Object.values(packed[k][i]).slice(5).map((c, j) => {
+            data[k * keyLen + j + 1][i] = c
+          })
+        } else {
+          keys.map((c, j) => {
+            data[k * keyLen + j + 1][i] = null
+          })
+        }
+      }
     }
 
     console.timeEnd("prep");
@@ -138,9 +157,11 @@
       cursor: cursorOpts,
       series: [{},
         series.series,
+        series.series, // temporary double
       ],
       axes: [{},
         series.axes,
+        series.axes, // temporary double
       ],
     };
     let el = document.getElementById('chart')
@@ -167,27 +188,38 @@
   }
 
   // let wait = document.getElementById("wait");
-  const actId = document.location.pathname.split('/').pop()
+  const search = document.location.search
   let plots = {}
   const select = document.getElementById('plots-select')
-  fetch(`/activity/${actId}/data`).then(r => r.json()).then(packed => {
+  console.time('fetch')
+  fetch(`/activity/data${search}`).then(r => r.json()).then(packed => {
     // wait.textContent = "Rendering...";
+    console.timeEnd('fetch')
     console.time('ready')
-    console.log(Object.keys(packed[0]).slice(5))
+    // console.log(packed)
+    // console.log(Object.keys(packed[0][0]).slice(5))
+    const keys = Object.keys(packed[0][0]).slice(5)
     let data = prepData(packed);
-    setTimeout(() => {
-      Object.keys(packed[0])
-        .slice(5)
-        .map((c, i) => {
-          plots[c] = makeChart(Array(data[0], data[i + 1]), c)
-        })
-    }, 0);
+    console.log(data)
+      setTimeout(() => {
+        console.log(keys)
+          keys.map((c, i) => {
+            console.log(c,i)
+            let dataArray = Array(packed.length + 1)
+            dataArray[0] = data[0]
+            for (let j = 1; j <= packed.length; j++) {
+              dataArray[j] = data[i + 1 + keys.length * (j - 1)]
+            }
+            // console.log(dataArray)
+            plots[c] = makeChart(dataArray, c)
+          })
+      }, 0);
 
-    Object.keys(packed[0]).slice(5).map(c => {
-      select.add(new Option(c, c, true, true))
-    })
+      keys.map(c => {
+        select.add(new Option(c, c, true, true))
+      })
 
-    setTimeout(() => console.timeEnd('ready'), 0)
+      setTimeout(() => console.timeEnd('ready'), 0)
   });
 
   select.onchange = function (e) {
