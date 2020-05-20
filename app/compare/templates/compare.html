@@ -265,6 +265,34 @@
       plots[key].root.hidden = selected.includes(key) ? false : true
     }
   }
+
+  function getSize() {
+    const container = document.getElementsByClassName('columns')[0]
+    const cols = document.getElementsByClassName('column')
+    return {
+      width: container.clientWidth - cols[0].clientWidth,
+      height: 200,
+    }
+  }
+
+  function throttle(cb, limit) {
+    var wait = false;
+
+    return () => {
+      if (!wait) {
+        requestAnimationFrame(cb);
+        wait = true;
+        setTimeout(() => {
+          wait = false;
+        }, limit);
+      }
+    }
+  }
+
+  window.addEventListener("resize", throttle(() => {
+    let size = getSize()
+    Object.keys(plots).map(u => plots[u].setSize(size))
+  }, 200));
 </script>
 
 {% endblock scripts %}
