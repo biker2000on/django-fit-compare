@@ -174,7 +174,8 @@
   function makeChart(data, key = 'power') {
     console.time("chart");
     const series = makeSeries(dataProps[key], data.length - 1)
-    console.log(series)
+    // console.log(series)
+    const initSize = getSize()
     const cursorOpts = {
       lock: true,
       sync: {
@@ -186,8 +187,8 @@
     }
     const opts = {
       // title: "Test",
-      width: 800,
-      height: 200,
+      width: initSize.width,
+      height: initSize.height,
       cursor: cursorOpts,
       series: [{},
         ...series.series,
@@ -234,11 +235,11 @@
     // console.log(Object.keys(packed[0][0]).slice(5))
     const keys = Object.keys(packed[0][0]).slice(5)
     let data = prepData(packed);
-    console.log(data)
+    // console.log(data)
     setTimeout(() => {
-      console.log(keys)
+      // console.log(keys)
       keys.map((c, i) => {
-        console.log(c, i)
+        // console.log(c, i)
         let dataArray = Array(packed.length + 1)
         dataArray[0] = data[0]
         for (let j = 1; j <= packed.length; j++) {
@@ -271,7 +272,7 @@
     const cols = document.getElementsByClassName('column')
     return {
       width: container.clientWidth - cols[0].clientWidth,
-      height: 200,
+      height: 400,
     }
   }
 
