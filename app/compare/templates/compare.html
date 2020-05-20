@@ -10,20 +10,22 @@
 {% block content %}
 
 {% if activities %}
-<ul>
-  {% for activity in activities %}
-  <li>{{ activity }}</li>
-  {% endfor %}
-</ul>
+<div class="is-loading"></div>
 {% else %}
 <p class="is-size-3">No activities queried</p>
 {% endif %}
-
-<div class="select is-multiple is-loading">
-  <select id="plots-select" multiple>
-  </select>
+<div class="columns">
+  <div class="column is-one-fifth">
+    <div class="select is-multiple">
+      <select id="plots-select" multiple>
+      </select>
+    </div>
+  </div>
+  <div class="column">
+    <progress class="progress is-large is-primary" max="100" id="loader">60%</progress>
+    <div id="chart"></div>
+  </div>
 </div>
-<div id="chart"></div>
 
 {% endblock content %}
 
@@ -201,25 +203,27 @@
     const keys = Object.keys(packed[0][0]).slice(5)
     let data = prepData(packed);
     console.log(data)
-      setTimeout(() => {
-        console.log(keys)
-          keys.map((c, i) => {
-            console.log(c,i)
-            let dataArray = Array(packed.length + 1)
-            dataArray[0] = data[0]
-            for (let j = 1; j <= packed.length; j++) {
-              dataArray[j] = data[i + 1 + keys.length * (j - 1)]
-            }
-            // console.log(dataArray)
-            plots[c] = makeChart(dataArray, c)
-          })
-      }, 0);
-
-      keys.map(c => {
-        select.add(new Option(c, c, true, true))
+    setTimeout(() => {
+      console.log(keys)
+      keys.map((c, i) => {
+        console.log(c, i)
+        let dataArray = Array(packed.length + 1)
+        dataArray[0] = data[0]
+        for (let j = 1; j <= packed.length; j++) {
+          dataArray[j] = data[i + 1 + keys.length * (j - 1)]
+        }
+        // console.log(dataArray)
+        plots[c] = makeChart(dataArray, c)
+        document.getElementById('loader').remove()
       })
+    }, 0);
 
-      setTimeout(() => console.timeEnd('ready'), 0)
+    keys.map(c => {
+      select.add(new Option(c, c, true, true))
+    })
+    select.parentElement.classList.remove('is-loading')
+
+    setTimeout(() => console.timeEnd('ready'), 0)
   });
 
   select.onchange = function (e) {
