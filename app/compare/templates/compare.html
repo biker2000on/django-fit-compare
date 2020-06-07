@@ -23,7 +23,7 @@
   </div>
   <div class="column">
     <progress class="progress is-large is-primary" max="100" id="loader">60%</progress>
-    <div id="chart"></div>
+    <div id="chart" data-activities="{{ activities }}" data-group="{{ group.id }}"></div>
   </div>
 </div>
 
@@ -223,11 +223,14 @@
   }
 
   // let wait = document.getElementById("wait");
-  const search = document.location.search
+  const chart = document.getElementById('chart')
+  const activities = JSON.parse(chart.dataset.activities)
+  const groupId = JSON.parse(chart.dataset.group)
+  // const search = document.location.search
   let plots = {}
   const select = document.getElementById('plots-select')
   console.time('fetch')
-  fetch(`/activity/data${search}`).then(r => r.json()).then(packed => {
+  fetch(`/group/data/${groupId}`).then(r => r.json()).then(packed => {
     // wait.textContent = "Rendering...";
     console.timeEnd('fetch')
     console.time('ready')

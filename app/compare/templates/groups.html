@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+{% if activitygroup_list %}
+
+  <table class="table is-bordered is-hoverable has-text-centered">
+    <thead>
+      <tr>
+        <th>Name</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for group in activitygroup_list %}
+      <tr>
+        <td><a href="{% url 'compare:group-compare' group.id %}">{{ group.name }}</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+{% endif %}
+
+{% endblock content %}

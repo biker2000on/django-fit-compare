@@ -3,25 +3,49 @@
 {% block content %}
 
 {% if activity_list %}
-<table class="table is-bordered is-hoverable has-text-centered">
+<form action="{% url 'compare:group' %}" method="post" id="groupform">
+  {% csrf_token %}
+
+  <table class="table is-bordered is-hoverable has-text-centered">
     <thead>
-        <tr>
-            <th>Activity</th>
-            <th>Start Time</th>
-            <th>Distance</th>
-        </tr>
+      <tr>
+        <th></th>
+        <th>Activity</th>
+        <th>Start Time</th>
+        <th>Distance</th>
+      </tr>
     </thead>
     <tbody>
-        {% for act in activity_list %}
-        <tr>
-            <td><a href="{% url 'compare:activity-detail' act.id %}">{{ act.fitfile.file.name }}</a></td>
-            <td>{{ act.start_time }}</td>
-            <td>{{ act.total_distance }}</td>
-        </tr>
-        {% endfor %}
+      {% for act in activity_list %}
+      <tr>
+        <td><input id="{{ act.id }}" type="checkbox" value="true" name="{{ act.id }}"></td>
+        <td><a href="{% url 'compare:activity-detail' act.id %}">{{ act.fitfile.file.name }}</a></td>
+        <td>{{ act.start_time }}</td>
+        <td>{{ act.total_distance }}</td>
+      </tr>
+      {% endfor %}
     </tbody>
-</table>
+  </table>
+
+  <div class="field">
+    <label for="name">Group Name</label>
+    <div class="control">
+      <input type="text" class="input" name="name">
+    </div>
+    <p class="help">Please enter the group name</p>
+  </div>
+  <button type="submit" class="button is-primary">Group Rides</button>
+</form>
 
 {% endif %}
 
 {% endblock content %}
+
+{% block scripts %}
+<script>
+  // const form = document.getElementById('groupform')
+  // form.addEventListener('submit', function(e) {
+  //   form
+  // })
+</script>
+{% endblock scripts %}

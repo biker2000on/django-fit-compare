@@ -100,3 +100,9 @@ class Record(models.Model):
     heart_rate = models.IntegerField(default=None, blank=True, null=True)
     cadence = models.IntegerField(default=None, blank=True, null=True)
     temperature = models.IntegerField(default=None, blank=True, null=True)
+
+class ActivityGroup(models.Model):
+    activity = models.ManyToManyField(Activity)
+    name = models.CharField(max_length=50)
+    created_date = models.DateTimeField(auto_now_add=True)
+    modified_date = models.DateTimeField(auto_now=True)

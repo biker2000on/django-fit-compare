@@ -6,25 +6,15 @@ from django.urls import reverse
 from django.utils import timezone
 from .fitprocessing import handle_uploaded_file
 from .forms import UploadFileForm
-from .models import Activity
-
-def image_upload(request):
-    if request.method == "POST" and request.FILES["image_file"]:
-        image_file = request.FILES["image_file"]
-        fs = FileSystemStorage()
-        filename = fs.save(image_file.name, image_file)
-        image_url = fs.url(filename)
-        print(image_url)
-        return render(request, "upload.html", {
-            "image_url": image_url
-        })
-    return render(request, "upload.html")
+from .models import Activity, ActivityGroup
 
 def upload_file(request):
     if request.method == 'POST':
         form = UploadFileForm(request.POST, request.FILES)
+        files = request.FILES.getlist('files')
         if form.is_valid():
-            handle_uploaded_file(request.FILES['file'])
+            for f in files:
+                handle_uploaded_file(f)
             return HttpResponseRedirect(reverse('compare:upload'))
     else:
         form = UploadFileForm()
@@ -56,6 +46,28 @@ def json_rides(request):
             acts.append(list(Activity.objects.get(id=act).record_set.all().values()))
     return JsonResponse(acts, safe=False)
 
+def group_rides(request, pk):
+    activities = list(ActivityGroup.objects.get(id=pk).activity.all().values_list('id', flat=True))
+    acts = []
+    if activities:
+        for act in activities:
+            acts.append(list(Activity.objects.get(id=act).record_set.all().values()))
+    return JsonResponse(acts, safe=False)
+
+def set_group(request):
+    if request.method == 'POST':
+        activities = list(request.POST.keys())
+        activities = activities[1:len(activities)-1]
+        name = request.POST['name']
+        group = ActivityGroup(name=name)
+        group.save()
+        group.activity.add(*activities)
+        # for act in activities:
+        #     group.acti.add(act)
+        # print(request)
+    return HttpResponseRedirect(reverse('compare:index'))
+
+
 class IndexView(generic.ListView):
     template_name = 'index.html'
     model = Activity
@@ -64,9 +76,15 @@ class ActivityDetailView(generic.DetailView):
     template_name = 'activity_detail_uplot.html'
     model = Activity
 
-def compareView(request):
-    activities = request.GET.get('activities', None)
-    if activities:
-        activities = activities.split(',')
+class GroupView(generic.ListView):
+    template_name = 'groups.html'
+    model = ActivityGroup
 
-    return render(request, 'compare.html', {"activities": activities})
+def compareView(request, pk):
+    # activities = request.GET.get('activities', None)
+    group = ActivityGroup.objects.get(id=pk)
+    activities = list(group.activity.all().values_list('id', flat=True))
+    # if activities:
+    #     activities = activities.split(',')
+
+    return render(request, 'compare.html', {"activities": activities, "group": group})
